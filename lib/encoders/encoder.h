@@ -1,44 +1,46 @@
-#ifndef ENCODER_CONTROL_H
-#define ENCODER_CONTROL_H
+#ifndef H_BRIDGE_H
+#define H_BRIDGE_H
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/pulse_cnt.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
-#include "esp_log.h"
+#include "esp_err.h"
 
-// Motor Esquerdo
-#define MOTOR_L_IN1_PIN         26  // pino de direcao 1
-#define MOTOR_L_IN2_PIN         25  // pino de direcao2
-#define MOTOR_L_PWM_PIN         33  // pino de velocidade
-#define ENCODER_L_A_PIN         35  // pino A do encode
-#define ENCODER_L_B_PIN         32  // pino B do encoder
+typedef enum {
+    MOTOR_LEFT,
+    MOTOR_RIGHT
+} motor_side_t;
 
-// Motor Direito
-#define MOTOR_R_IN1_PIN         19  // pino de direcao 1
-#define MOTOR_R_IN2_PIN         18  // pino de direcao 2
-#define MOTOR_R_PWM_PIN         5   // pino de velocidade (PWM)
-#define ENCODER_R_A_PIN         34  // pino A do encoder
-#define ENCODER_R_B_PIN         39  // Ppno B do encoder
+#define MOTOR_LEFT_IN_1   GPIO_NUM_26
+#define MOTOR_LEFT_IN_2   GPIO_NUM_25
+#define MOTOR_LEFT_PWM    GPIO_NUM_33
 
-// PWM 
-#define LEDC_TIMER              LEDC_TIMER_0
-#define LEDC_MODE               LEDC_LOW_SPEED_MODE
-#define LEDC_CHANNEL_L          LEDC_CHANNEL_0
-#define LEDC_CHANNEL_R          LEDC_CHANNEL_1
-#define LEDC_DUTY_RESOLUTION    LEDC_TIMER_8_BIT
-#define LEDC_FREQUENCY          5000 // frequencia 
+#define MOTOR_RIGHT_IN_1  GPIO_NUM_19
+#define MOTOR_RIGHT_IN_2  GPIO_NUM_18
+#define MOTOR_RIGHT_PWM   GPIO_NUM_5
 
-// PCNT
-#define PCNT_HIGH_LIMIT         10000
-#define PCNT_LOW_LIMIT          -10000
+#define LEDC_TIMER          LEDC_TIMER_0
+#define LEDC_MODE           LEDC_LOW_SPEED_MODE
+#define LEDC_RESOLUTION     LEDC_TIMER_8_BIT // Resolução de 8 bits (0-255)
+#define LEDC_FREQUENCY      (5000)
 
+#define LEDC_CHANNEL_LEFT   LEDC_CHANNEL_0
+#define LEDC_CHANNEL_RIGHT  LEDC_CHANNEL_1
 
-void motors_init(void);
+#define MOTOR_IN1_PIN(side)     ((side) == MOTOR_LEFT ? MOTOR_LEFT_IN_1 : MOTOR_RIGHT_IN_1)
+#define MOTOR_IN2_PIN(side)     ((side) == MOTOR_LEFT ? MOTOR_LEFT_IN_2 : MOTOR_RIGHT_IN_2)
+#define MOTOR_PWM_PIN(side)     ((side) == MOTOR_LEFT ? MOTOR_LEFT_PWM : MOTOR_RIGHT_PWM)
+#define LEDC_CHANNEL(side)      ((side) == MOTOR_LEFT ? LEDC_CHANNEL_LEFT : LEDC_CHANNEL_RIGHT)
 
-void encoders_init(void);
+/**
+ * @brief Inicializa os pinos GPIO e os canais PWM para ambos os motores.
+ */
+void h_bridge_init(void);
 
-void motor_and_encoder_test_task(void *pvParameters);
+/**
+ * @brief Controla a velocidade e a direção de um motor específico.
+ * @param side O motor a ser controlado (MOTOR_LEFT ou MOTOR_RIGHT).
+ * @param speed A velocidade do motor, de -255 (marcha à ré máxima) a 255 (avanço máximo). 0 para o motor.
+ */
+void h_bridge_control_motor(motor_side_t side, int speed);
 
-#endif // ENCODER_CONTROL_H
+#endif // H_BRIDGE_H
