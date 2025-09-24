@@ -16,7 +16,7 @@ void robot_control_task(void *pvParameters) {
     while (1) {
         pid_update_motor(MOTOR_LEFT, target_speed);
         pid_update_motor(MOTOR_RIGHT, target_speed);
-        vTaskDelayUntil(&last_wake_time, pdMS_TO_TO_TICKS(CONTROL_LOOP_PERIOD_MS));
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(CONTROL_LOOP_PERIOD_MS));
     }
 }
 
@@ -32,3 +32,4 @@ void app_main(void) {
     // cria a tarefa de controle do robô
     xTaskCreate(robot_control_task, "RobotControlTask", 4096, NULL, 5, NULL);
 }
+
