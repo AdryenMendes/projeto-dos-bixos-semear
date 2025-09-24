@@ -1,54 +1,44 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
-#include "h_bridge.h"         // Inclui nosso módulo de motor
-#include "encoder_control.h"  // Inclui nosso módulo de encoder
+#include "h_bridge.h"
+#include "encoder_control.h"
+#include "pid_controller.h" 
 
-static const char *TAG = "APP_MAIN";
+static const char *TAG = "ROBOT_MAIN";
 
-// Tarefa de teste que move os motores e le encoders
+// período do loop de controle
+#define CONTROL_LOOP_PERIOD_MS 20
+
+/**
+ * @brief Tarefa principal que executa o loop de controle do robô.
+ */
 void robot_control_task(void *pvParameters) {
-    int pulse_count_L = 0;
-    int pulse_count_R = 0;
-    
-    // Velocidade de teste constante para os motores 
-    int test_speed = 150; 
+    // Velocidade alvo
+    const float target_speed = 3.14159f; // Meia volta por segundo
 
-    ESP_LOGI(TAG, "Iniciando tarefa de controle...");
+    // garantir ciclo de execução preciso
+    TickType_t last_wake_time = xTaskGetTickCount();
 
     while (1) {
-        // Mover ambos os motores para a frente com a velocidade de teste
-        h_bridge_control_motor(MOTOR_LEFT, test_speed);
-        h_bridge_control_motor(MOTOR_RIGHT, test_speed);
-        
-        // Lê a contagem de pulsos dos encoders
-        encoder_get_count(ENCODER_LEFT, &pulse_count_L);
-        encoder_get_count(ENCODER_RIGHT, &pulse_count_R);
+        // controle PID p ambos os motores
+        pid_update_motor(MOTOR_LEFT, target_speed);
+        pid_update_motor(MOTOR_RIGHT, target_speed);
 
-        // Mostra os valores lidos no log
-        ESP_LOGI(TAG, "Contagem Esquerda: %d, Contagem Direita: %d", pulse_count_L, pulse_count_R);
-
-        // Aguarda um pouco antes da próxima leitura
-        vTaskDelay(pdMS_TO_TICKS(100));
+        // aguarda próximo ciclo
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(CONTROL_LOOP_PERIOD_MS));
     }
 }
 
 void app_main(void) {
-    // inicializa o hardware dos motores
+    // inicializa os módulos hardware
     h_bridge_init();
-    ESP_LOGI(TAG, "Módulo da Ponte H inicializado.");
-
-    // inicializa o hardware dos encoders
     encoders_init();
-    ESP_LOGI(TAG, "Módulo dos Encoders inicializado.");
 
-    // cria e inicia a tarefa de controle principal
-    xTaskCreate(
-        robot_control_task,         // Função da tarefa
-        "Robot Control Task",       // Nome da tarefa
-        4096,                       // Tamanho da pilha
-        NULL,                       // Parâmetro da tarefa
-        5,                          // Prioridade
-        NULL                        // Handle da tarefa (opcional)
-    );
+    // reseta o estado do controlador PID
+    pid_reset_state();
+    ESP_LOGI(TAG, "Hardware e controlador PID inicializados.");
+
+    // cria a tarefa de controle
+    xTaskCreate(robot_control_task, "RobotControlTask", 4096, NULL, 5, NULL);
 }
