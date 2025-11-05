@@ -1,31 +1,37 @@
+#ifndef ENCODER_H
+#define ENCODER_H
 
-#ifndef ENCODER_CONTROL_H
-#define ENCODER_CONTROL_H
-
+#include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
-#include "driver/pulse_cnt.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_timer.h"
 #include "esp_log.h"
+#include "driver/pulse_cnt.h"
+#include "driver/gpio.h"
+#include "esp_sleep.h"
 
-typedef enum {
-    ENCODER_LEFT,
-    ENCODER_RIGHT
+#define PCNT_HIGH_LIMIT     1500
+#define PCNT_LOW_LIMIT     -1500
+
+#define ENCODER_CHA_R1      GPIO_NUM_0
+#define ENCODER_CHA_R2      GPIO_NUM_0
+
+#define ENCODER_CHA_L1      GPIO_NUM_13
+#define ENCODER_CHA_L2      GPIO_NUM_14
+
+typedef enum
+{
+    ENCODER_LEFT = 0,
+    ENCODER_RIGHT = 1
+
 } encoder_side_t;
 
-#define ENCODER_L_A_PIN     35
-#define ENCODER_L_B_PIN     32
+#define ENCODER_INPUT_A(NUM) NUM == (ENCODER_LEFT) ? ENCODER_CHA_L1 : ENCODER_CHA_R1
+#define ENCODER_INPUT_B(NUM) NUM == (ENCODER_LEFT) ? ENCODER_CHA_L2 : ENCODER_CHA_R2
 
-#define ENCODER_R_A_PIN     34
-#define ENCODER_R_B_PIN     39 // Pino 39 é ADC1_CH3, ok para entrada digital
-
-#define ENCODER_A_PIN(side) ((side) == ENCODER_LEFT ? ENCODER_L_A_PIN : ENCODER_R_A_PIN)
-#define ENCODER_B_PIN(side) ((side) == ENCODER_LEFT ? ENCODER_L_B_PIN : ENCODER_R_B_PIN)
-
-#define PCNT_HIGH_LIMIT     10000
-#define PCNT_LOW_LIMIT      -10000
-
-
-void encoders_init(void);
-esp_err_t encoder_get_count(encoder_side_t side, int *count);
-esp_err_t encoder_clear_count(encoder_side_t side);
+pcnt_unit_handle_t init_encoder(encoder_side_t encoder);
+bool pcnt_on_reach(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *user_ctx);
+float pulse_count(pcnt_unit_handle_t encoder);
 
 #endif
