@@ -1,25 +1,42 @@
-#ifndef PID_CONTROLLER_H
-#define PID_CONTROLLER_H
+#ifndef PID_H
+#define PID_H
 
-#include "h_bridge.h" // Necessário para o tipo motor_side_t
+#include "h_bridge.h"
+#include "encoder.h"
+#include "esp_err.h"
+#include "esp_check.h"
+#include "pid_ctrl.h"
 
-/**
- * @brief Reseta o estado acumulado (integral, erro anterior) dos controladores PID.
- *
- * Deve ser chamado uma vez na inicialização para garantir um começo limpo.
- */
-void pid_reset_state(void);
+#define KP_R 3
+#define KI_R 0
+#define KD_R 0
+#define MAX_OUTPUT_R 1023
+#define MIN_OUTPUT_R -1023
+#define MAX_INTEGRAL_R 1023
+#define MIN_INTEGRAL_R -1023
 
-/**
- * @brief Executa um ciclo completo do controle de velocidade para um motor.
- *
- * Esta função realiza a leitura do encoder, calcula a velocidade atual,
- * computa a saída do PID e envia o comando de PWM para a ponte H.
- *
- * @param side O motor a ser controlado (MOTOR_LEFT ou MOTOR_RIGHT).
- * @param target_rads A velocidade alvo desejada para o motor em radianos por segundo.
- */
-void pid_update_motor(motor_side_t side, float target_rads);
+#define KP_L 2
+#define KI_L 0.5
+#define KD_L 0
+#define MAX_OUTPUT_L 1023
+#define MIN_OUTPUT_L -1023
+#define MAX_INTEGRAL_L 1023 
+#define MIN_INTEGRAL_L -1023
 
-#endif // PID_CONTROLLER_H
+#define kp(MOTOR) (MOTOR == RIGHT_MOTOR)? KP_R : KP_L
+#define ki(MOTOR) (MOTOR == RIGHT_MOTOR)? KI_R : KI_L
+#define kd(MOTOR) (MOTOR == RIGHT_MOTOR)? KD_R : KD_L
+#define max_output(MOTOR) (MOTOR == RIGHT_MOTOR)? MAX_OUTPUT_R : MAX_OUTPUT_L
+#define min_output(MOTOR) (MOTOR == RIGHT_MOTOR)? MIN_OUTPUT_R : MIN_OUTPUT_L
+#define max_integral(MOTOR) (MOTOR == RIGHT_MOTOR)? MAX_INTEGRAL_R : MAX_INTEGRAL_L
+#define min_integral(MOTOR) (MOTOR == RIGHT_MOTOR)? MIN_INTEGRAL_R : MIN_INTEGRAL_L
 
+#define FREQ_COMUNICATION       10
+
+pid_ctrl_block_handle_t init_pid(motor_side_t motor);
+
+void PWM_limit(float*);
+
+esp_err_t pid_calculate(pid_ctrl_block_handle_t pid, motor_side_t motor, float target_rads, float* inc_value, pcnt_unit_handle_t encoder);
+
+#endif
