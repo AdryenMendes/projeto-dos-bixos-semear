@@ -2,12 +2,12 @@
 #include "h_bridge.h"
 #include "PID.h"
 #include "uart_esp32.h"
-#include <stdio.h> // Necessário para snprintf
+#include <stdio.h> 
 
 /**
  * @brief config e inicializa a porta UART p receber dados
  * 
- * ATENÇÃO: esta função e a init_uart_write() foram corrigidas para usar a mesma
+ * a função e a init_uart_write() foram corrigidas p usar a mesma
  * porta UART (UART_PORT_NUM), evitar conflitos hardware
  */
 
@@ -39,9 +39,9 @@ target_rads_data_t receive_data(target_rads_data_t *last_target_rads)
 
     if (len > 0)
     {
-        buffer[len] = '\0'; // Adiciona o terminador nulo para tratar como string
+        buffer[len] = '\0'; // add terminador nulo p tratar como string
 
-        // usa strtok p separar string por ";"
+        // usa strtok p separar string por ;
         char *token = strtok((char *)buffer, ";");
         if (token != NULL)
         {
@@ -59,7 +59,7 @@ target_rads_data_t receive_data(target_rads_data_t *last_target_rads)
         return target_rads;
     }
 
-    // se leitura falhar retorna o último valor válido
+    // se leitura falhar retorna o ultimo valor valido
     return *last_target_rads;
 }
 
@@ -68,14 +68,14 @@ target_rads_data_t receive_data(target_rads_data_t *last_target_rads)
 
 void send_data(rads_data_t rads)
 {
-    // usa buffer de char, mais apropriado p manipulação de strings
+    // usa buffer de char, é melhor p manipulação de strings
     char buffer[128];
 
-    // formata a string de forma segura com snprintf
-    // adiciona o '\n' no final para servir como um delimitador claro de mensagem
+    // formata a string de forma segura c snprintf
+    // adiciona '\n' no final
     int len = snprintf(buffer, sizeof(buffer), "%.2f;%.2f\n", rads.left_rads, rads.right_rads);
 
-    // envia número de bytes que mensagem realmente contém
+    // envia número de bytes que mensagem real contém
     if (len > 0) {
         uart_write_bytes(UART_PORT_NUM, (const char *)buffer, len);
     }
