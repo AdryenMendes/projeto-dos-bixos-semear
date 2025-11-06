@@ -1,9 +1,8 @@
 #include "h_bridge.h"
 
-//Inicializa os pinos da ESP (motores, PMW, standBy)
+
 void init_gpio(motor_side_t motor)
 {
-
     gpio_set_direction(MOTOR_INPUT_1(motor), GPIO_MODE_OUTPUT);
     gpio_set_direction(MOTOR_INPUT_2(motor), GPIO_MODE_OUTPUT);
 
@@ -14,7 +13,7 @@ void init_gpio(motor_side_t motor)
 
 }
 
-//Configura o PMW (timer e canal)
+// config PMW (timer e canal)
 void init_pwm(motor_side_t motor)
 {
 
@@ -38,7 +37,7 @@ void init_pwm(motor_side_t motor)
     ledc_channel_config(&motor_channel);
 }
 
-//Chaveamento da ponte H para o motor rodar p/ frente
+// chaveamento da ponte H p motor rodar p frente
 esp_err_t _set_forward(motor_side_t motor)
 {
     gpio_set_level(MOTOR_INPUT_1(motor), HIGH);
@@ -46,7 +45,7 @@ esp_err_t _set_forward(motor_side_t motor)
     return ESP_OK;
 }
 
-//Chaveamento da ponte H para o motor rodar p/ trás
+//Chaveamento da ponte H p motor rodar p tras
 esp_err_t _set_backward(motor_side_t motor)
 {
     gpio_set_level(MOTOR_INPUT_1(motor), LOW);
@@ -54,7 +53,7 @@ esp_err_t _set_backward(motor_side_t motor)
     return ESP_OK;
 }
 
-//Atualiza o valor do PMW enviado para o motor e a direção desejada
+// atualiza valor do PMW enviado p motor e direção desejada
 esp_err_t update_motor(motor_side_t motor, int u)
 {
     u > 0 ? _set_forward(motor) : _set_backward(motor);
