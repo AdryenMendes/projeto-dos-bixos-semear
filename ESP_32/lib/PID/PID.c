@@ -4,7 +4,7 @@
 const char *TAG_PID = "PID";
 const char *TAG_PID_CTRL = "PID CTRL";
 
-// inicializa e config PID (retorna 'pid_ctrl_block_handle_t' pronto)
+
 pid_ctrl_block_handle_t init_pid(motor_side_t motor)
 {
 
