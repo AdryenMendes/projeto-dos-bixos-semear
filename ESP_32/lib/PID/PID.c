@@ -4,7 +4,7 @@
 const char *TAG_PID = "PID";
 const char *TAG_PID_CTRL = "PID CTRL";
 
-//Inicializa e configura o PID (retorna o 'pid_ctrl_block_handle_t' pronto)
+// inicializa e config PID (retorna 'pid_ctrl_block_handle_t' pronto)
 pid_ctrl_block_handle_t init_pid(motor_side_t motor)
 {
 
@@ -34,7 +34,7 @@ pid_ctrl_block_handle_t init_pid(motor_side_t motor)
     return pid;
 }
 
-//Aplica o controle PID sobre o erro da velocidade, atualizando o PMW dos motores
+// controle PID sobre erro da veloc atualizando PMW dos motores
 esp_err_t pid_calculate(pid_ctrl_block_handle_t pid, motor_side_t motor, float target_rads, float* inc_value, pcnt_unit_handle_t encoder)
 {
     float current_rads = encoder_get_speed_rads(encoder);
